@@ -16,13 +16,20 @@ services:
       - "4000:4000"
     command: npm run dev
   db:
-    container_name: mongoDBUser
-    image: mongo:latest
-    restart: always
+    container_name: "postgresDbUser"
+    image: "postgis/postgis"
+    ports: 
+      - "5433:5432"
     volumes:
-      - ./userData:/data/db
+      - db_persdata:/var/lib/db
     environment:
-      - MONGO_INITDB_DATABASE=User
-      - DATABASE_URL=mongodb://db/user
-    ports:
-      - 27017:27017
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user
+    networks:
+      - default
+
+networks:
+  default:
+volumes:
+  db_persdata : {}

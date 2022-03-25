@@ -9,7 +9,7 @@ services:
     volumes:
       - ./src:/home/node/app/src
       - ./nodemon.json:/home/node/app/nodemon.json
-    container_name: proespecies-user
+    container_name: eu-pescador-user
     expose:
       - "4000"
     ports:
@@ -19,9 +19,10 @@ services:
     container_name: "postgresDbUser"
     image: "postgres:latest"
     ports: 
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - db_persdata:/var/lib/db
+    command: postgres -c port=5432
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: admin

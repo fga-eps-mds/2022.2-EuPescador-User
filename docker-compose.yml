@@ -17,14 +17,14 @@ services:
     command: npm run dev
   db:
     container_name: "postgresDbUser"
-    image: "postgis/postgis"
+    image: "postgres:latest"
     ports: 
       - "5433:5432"
     volumes:
       - db_persdata:/var/lib/db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: admin
       POSTGRES_DB: user
     networks:
       - default

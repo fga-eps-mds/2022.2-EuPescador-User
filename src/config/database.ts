@@ -1,20 +1,13 @@
-import { Pool } from 'pg'
-const databaseConnect = async () => {
-  try {
-    const pool = new Pool({
-        user: 'postgres',
-        host: 'db',
-        database: 'user',
-        password: 'password',
-        port: 5432
-    });
+import { DataSource } from 'typeorm'
 
-    await pool.connect()
-    return pool;
-  } catch (error) {
-    console.log('Não foi possível inicicializar corretamente a base de dados!');
-    console.log(error);
-  }
-};
-
-export default databaseConnect;
+export const connection =  new DataSource({
+  type: "postgres",
+  host: "db",
+  port: 5432,
+  username: "root",
+  password: "admin",
+  database: "user",
+  entities: [],
+  synchronize: true,
+  logging: false
+});

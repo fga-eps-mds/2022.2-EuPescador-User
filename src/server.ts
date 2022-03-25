@@ -1,9 +1,7 @@
-import databaseConnect from './config/database';
+import { connection } from './config/database';
 import app from './app';
 
-databaseConnect().then(() => {
-  console.log('Banco conectado!')
-});
+connection.initialize().then(() => { console.log("Banco conectado")} ).catch((err) => console.log(err));
 
 const serverPort = process.env.PORT || 4000;
 

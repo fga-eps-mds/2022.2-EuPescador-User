@@ -1,5 +1,5 @@
 {
-  "name": "2021.1-pro-especies-user",
+  "name": "2021.2-eu-pescador-user",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fga-eps-mds/2021.1-Pro-Especies-User.git"
+    "url": "git+https://github.com/fga-eps-mds/2021.2-Eu-Pescador-User.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/fga-eps-mds/2021.1-Pro-Especies-User/issues"
+    "url": "https://github.com/fga-eps-mds/2021.2-Eu-Pescador-User/issues"
   },
-  "homepage": "https://github.com/fga-eps-mds/2021.1-Pro-Especies-User#readme",
+  "homepage": "https://github.com/fga-eps-mds/2021.2-Eu-Pescador-User#readme",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.13",
@@ -50,8 +50,6 @@
     "express": "^4.17.1",
     "jest-sonar": "^0.2.12",
     "jsonwebtoken": "^8.5.1",
-    "mongodb": "^4.1.0",
-    "mongoose": "^5.13.8",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "supertest": "^6.1.6",

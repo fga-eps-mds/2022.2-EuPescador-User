@@ -44,7 +44,7 @@ describe('Test Create User function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
     userRepository.findOne = jest.fn();
     jest
       .spyOn(userRepository, 'save')
@@ -66,7 +66,7 @@ describe('Test Create User function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
     userRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce(userMock),
     }));
@@ -87,7 +87,7 @@ describe('Test Create User function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
     userRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce(userMock),
     }));
@@ -108,7 +108,7 @@ describe('Test Create User function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
     userRepository.findOne = jest.fn();
     const res = await userController.createUser(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(401);
@@ -128,7 +128,7 @@ describe('Test Create User function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
 
     jest
       .spyOn(userRepository, 'save')
@@ -143,7 +143,7 @@ describe('Test Create User function', () => {
 describe('Test Get All Users function', () => {
   it('should get a statusCode 200 if request succeed', async () => {
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
 
     userRepository.find = jest.fn().mockResolvedValueOnce([userMock]);
     const res = await userController.getAllUsers(response);
@@ -152,8 +152,8 @@ describe('Test Get All Users function', () => {
 
   it('should get a statusCode 500 if request failed', async () => {
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
-    
+    const userRepository = connection.getRepository(User);
+
     userRepository.find = jest
       .fn()
       .mockImplementationOnce(() =>
@@ -173,7 +173,7 @@ describe('Test Login function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
 
     userRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce(userMock),
@@ -193,7 +193,7 @@ describe('Test Login function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
 
     userRepository.findOne = jest.fn().mockImplementationOnce(() => ({
       select: jest.fn().mockResolvedValueOnce(userMock),
@@ -210,7 +210,7 @@ describe('Test Login function', () => {
     };
 
     const response = mockResponse();
-    const userRepository = connection.getRepository(User)
+    const userRepository = connection.getRepository(User);
 
     userRepository.findOne = jest.fn();
     const res = await userController.login(mockRequest, response);

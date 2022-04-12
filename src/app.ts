@@ -1,8 +1,8 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import router from './routes/router';
+import 'reflect-metadata';
+require('dotenv').config();
 
-dotenv.config();
+import express from 'express';
+import router from './routes/router';
 
 const app = express();
 

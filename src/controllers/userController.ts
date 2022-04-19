@@ -6,7 +6,7 @@ import { User } from '../models/user';
 export default class UserController {
   createUser = async (req: Request, res: Response) => {
     try {
-      const { name, email, phone, admin, password, state, city } = await req.body;
+      const { name, email, phone, admin, password, state, city, superAdmin } = await req.body;
       const userRepository = connection.getRepository(User);
       const emailFind = await userRepository.findOne({where: {email}});
       const phoneFind = await userRepository.findOne({where: {phone}});
@@ -26,6 +26,7 @@ export default class UserController {
       user.password = password;
       user.admin = admin;
       user.phone = phone;
+      user.superAdmin = superAdmin;
       
       if (
         user.admin &&
@@ -34,6 +35,15 @@ export default class UserController {
         return res
           .status(401)
           .json({ message: 'Código de pesquisador invalido!' });
+      }
+
+      if (
+        user.superAdmin &&
+        req.body.superToken !== process.env.ADMIN_CONFIRMATION_CODE
+      ) {
+        return res
+          .status(401)
+          .json({ message: 'Código de administrador invalido!' });
       }
 
 

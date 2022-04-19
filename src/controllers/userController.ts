@@ -93,6 +93,7 @@ export default class UserController {
         email: user.email,
         password: user.password,
         admin: user.admin,
+        superAdmin: user.superAdmin,
       });
 
       return res.status(200).json({
@@ -101,6 +102,7 @@ export default class UserController {
         email: user.email,
         phone: user.phone,
         admin: user.admin,
+        superAdmin: user.superAdmin,
         token,
       });
     } catch (error) {

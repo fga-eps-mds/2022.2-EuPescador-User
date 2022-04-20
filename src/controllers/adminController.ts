@@ -6,16 +6,13 @@ import { User } from "../models/user";
 export default class AdminController {
   deleteUser = async (req: Request, res: Response) => {
     try {
-      const { email, token, city, name, state, phone } = await req.body;
+      // const { email, token, city, name, state, phone } = await req.body;
+      const token = req.headers.authorization?.split(' ')[1];
+      const id = Number(req.params.id);
       const userRepository = connection.getRepository(User);
-      const userExist = await userRepository.findOne({ where: { email } });
+      const userExist = await userRepository.findOne({ where: { id } });
 
       if (userExist && token === process.env.ADMIN_CONFIRMATION_CODE) {
-        userExist.email = email;
-        userExist.city = city;
-        userExist.name = name;
-        userExist.state = state;
-        userExist.phone = phone;
 
         await userRepository.remove(userExist);
 
@@ -37,6 +34,39 @@ export default class AdminController {
       });
     }
   };
+  // deleteUser = async (req: Request, res: Response) => {
+  //   try {
+  //     const { email, token, city, name, state, phone } = await req.body;
+  //     const userRepository = connection.getRepository(User);
+  //     const userExist = await userRepository.findOne({ where: { email } });
+
+  //     if (userExist && token === process.env.ADMIN_CONFIRMATION_CODE) {
+  //       userExist.email = email;
+  //       userExist.city = city;
+  //       userExist.name = name;
+  //       userExist.state = state;
+  //       userExist.phone = phone;
+
+  //       await userRepository.remove(userExist);
+
+  //       return res.status(200).json(userExist);
+  //     }
+  //     if (!userExist) {
+  //       return res.status(404).json({
+  //         message: "Usuário não encontrado",
+  //       });
+  //     }
+  //     if (token || token !== process.env.ADMIN_CONFIRMATION_CODE) {
+  //       return res.status(401).json({
+  //         message: "Você não tem autorização para deletar usuários",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     return res.status(400).json({
+  //       message: "Falha no sistema ao deletar, tente novamente!",
+  //     });
+  //   }
+  // };
 
   editUser = async (req: Request, res: Response) => {
     try {

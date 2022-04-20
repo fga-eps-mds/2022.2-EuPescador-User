@@ -5,7 +5,7 @@ const adminRoutes = Router();
 
 const adminController = new AdminController();
 
-adminRoutes.delete('/', (req: Request, res: Response) => {
+adminRoutes.delete('/:id', (req: Request, res: Response) => {
     adminController.deleteUser(req, res);
 });
 

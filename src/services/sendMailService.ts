@@ -27,4 +27,6 @@ export async function sendMailService(email: string) {
     subject: 'Recuperação de Senha',
     html,
   });
+
+  return token;
 }

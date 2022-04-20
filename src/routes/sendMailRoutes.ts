@@ -5,8 +5,8 @@ const sendMailRoutes = Router();
 
 const sendMailController = new SendMailController();
 
-sendMailRoutes.get('/', (req: Request, res: Response) => {
-  sendMailController.sendMail(req, res);
+sendMailRoutes.get('/', () => {
+  sendMailController.sendMail();
 });
 
 export default sendMailRoutes;

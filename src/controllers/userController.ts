@@ -26,7 +26,6 @@ export default class UserController {
       user.password = password;
       user.admin = admin;
       user.phone = phone;
-      
       if (
         user.admin &&
         req.body.token !== process.env.RESEARCHER_CONFIRMATION_CODE
@@ -35,7 +34,6 @@ export default class UserController {
           .status(401)
           .json({ message: 'Código de pesquisador invalido!' });
       }
-
 
       await userRepository.save(user);
 
@@ -50,7 +48,7 @@ export default class UserController {
   getAllUsers = async (res: Response) => {
     try {
       const userRepository = connection.getRepository(User);
-      const data = await userRepository.find({})
+      const data = await userRepository.find({});
       return res.status(200).json(data);
     } catch (error) {
       return res.status(500).json({
@@ -65,9 +63,9 @@ export default class UserController {
     try {
       const userRepository = connection.getRepository(User);
       const user =
-        (await userRepository.findOne({where: {email: emailPhone}})) ||
-        (await userRepository.findOne({where: {phone: emailPhone}}));
-    
+        (await userRepository.findOne({ where: { email: emailPhone } })) ||
+        (await userRepository.findOne({ where: { phone: emailPhone } }));
+
       if (!user) {
         return res.status(404).json({
           message: 'Usuário não encontado: Email ou telefone inválido!',
@@ -77,7 +75,7 @@ export default class UserController {
       if (password !== user.password) {
         return res.status(401).json({ message: 'Senha inválida' });
       }
-      
+
       const token = await authenticateUser.generateToken({
         id: user.id,
         email: user.email,
@@ -100,26 +98,24 @@ export default class UserController {
     }
   };
 
-  updateUser =async (req: Request, res: Response) => {
+  updateUser = async (req: Request, res: Response) => {
     try {
-      const {email, password} = req.body;
+      const { user_id, password } = req.body;
       const userRepository = connection.getRepository(User);
-      const user = await userRepository.findOne({where:email});
-      
+      const user = await userRepository.findOne({
+        where: { id: Number(user_id) },
+      });
 
       if (user) {
-        user.password= password;
-        await userRepository.update({id: Number(user.id)}, {...user});
+        user.password = password;
+        await userRepository.update({ id: Number(user.id) }, { ...user });
         return res
           .status(200)
-          .json({ message: "Usuário atualizado com sucesso" });
+          .json({ message: 'Usuário atualizado com sucesso' });
       }
-      return res.status(404).json({ message: "Usuário não encontrado" });
-
-      
+      return res.status(404).json({ message: 'Usuário não encontrado' });
     } catch (error) {
-      //console.log({ error: error.message });
-      return res.status(400).json({ message: "Falha ao atualizar usuário" });
+      return res.status(400).json({ message: 'Falha ao atualizar usuário' });
     }
-  }
+  };
 }

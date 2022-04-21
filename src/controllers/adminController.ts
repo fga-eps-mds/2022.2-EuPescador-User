@@ -34,39 +34,6 @@ export default class AdminController {
       });
     }
   };
-  // deleteUser = async (req: Request, res: Response) => {
-  //   try {
-  //     const { email, token, city, name, state, phone } = await req.body;
-  //     const userRepository = connection.getRepository(User);
-  //     const userExist = await userRepository.findOne({ where: { email } });
-
-  //     if (userExist && token === process.env.ADMIN_CONFIRMATION_CODE) {
-  //       userExist.email = email;
-  //       userExist.city = city;
-  //       userExist.name = name;
-  //       userExist.state = state;
-  //       userExist.phone = phone;
-
-  //       await userRepository.remove(userExist);
-
-  //       return res.status(200).json(userExist);
-  //     }
-  //     if (!userExist) {
-  //       return res.status(404).json({
-  //         message: "Usuário não encontrado",
-  //       });
-  //     }
-  //     if (token || token !== process.env.ADMIN_CONFIRMATION_CODE) {
-  //       return res.status(401).json({
-  //         message: "Você não tem autorização para deletar usuários",
-  //       });
-  //     }
-  //   } catch (error) {
-  //     return res.status(400).json({
-  //       message: "Falha no sistema ao deletar, tente novamente!",
-  //     });
-  //   }
-  // };
 
   editUser = async (req: Request, res: Response) => {
     try {
@@ -101,8 +68,9 @@ export default class AdminController {
         return res.status(200).json(userExistEdit);
       }
       if (!userExistEdit) {
-        return res.status(503).json({
-          message: "Você não tem permissão de editar um usuário",
+        return res.status(404).json({
+          //Mudar para erro item não encontrado
+          message: "O usuário que você quer editar não existe",
         });
       }
       if (token || token !== process.env.ADMIN_CONFIRMATION_CODE) {
@@ -111,7 +79,7 @@ export default class AdminController {
         });
       }
     } catch (error) {
-      return res.status(400).json({
+      return res.status(500).json({
         message: "Falha no sistema ao deletar, tente novamente!",
       });
     }

@@ -99,4 +99,27 @@ export default class UserController {
         .json({ message: 'Falha no sistema ao logar, tente novamente!' });
     }
   };
+
+  updateUser =async (req: Request, res: Response) => {
+    try {
+      const {email, password} = req.body;
+      const userRepository = connection.getRepository(User);
+      const user = await userRepository.findOne({where:email});
+      
+
+      if (user) {
+        user.password= password;
+        await userRepository.update({id: Number(user.id)}, {...user});
+        return res
+          .status(200)
+          .json({ message: "Usuário atualizado com sucesso" });
+      }
+      return res.status(404).json({ message: "Usuário não encontrado" });
+
+      
+    } catch (error) {
+      //console.log({ error: error.message });
+      return res.status(400).json({ message: "Falha ao atualizar usuário" });
+    }
+  }
 }

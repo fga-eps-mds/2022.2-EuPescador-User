@@ -12,9 +12,9 @@ export async function sendMailService(email: string) {
   `;
 
   let transporter: Transporter = nodemailer.createTransport({
-    port: 465,
-    secure: true,
-    service: 'gmail',
+    name: 'smtp.gmail.com',
+    host: 'smtp.gmail.com',
+    port: 587,
     auth: {
       user: process.env.SENDER_EMAIL,
       pass: process.env.SENDER_PASSWORD,
@@ -27,6 +27,7 @@ export async function sendMailService(email: string) {
     subject: 'Recuperação de Senha',
     html,
   });
+  await transporter.verify().then(console.log).catch(console.error);
 
   return token;
 }

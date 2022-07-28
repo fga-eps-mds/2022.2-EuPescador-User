@@ -5,6 +5,7 @@
 ## DataBase
 userData/
 
+*lock.json 
 ### Tests
 test-report.xml
 

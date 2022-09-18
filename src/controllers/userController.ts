@@ -136,7 +136,7 @@ export default class UserController {
 
       if (user) {
         user.password = password;
-        await userRepository.update({ id: Number(user.id) }, { ...user });
+        await userRepository.update({ id: Number(user.id) }, { ...req.body });
         return res
           .status(200)
           .json({ message: 'Usuário atualizado com sucesso' });

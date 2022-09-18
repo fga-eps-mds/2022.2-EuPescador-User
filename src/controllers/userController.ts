@@ -69,6 +69,19 @@ export default class UserController {
       });
     }
   };
+  getOneUser = async (req: Request,res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      const userRepository = connection.getRepository(User);
+      const userExist = await userRepository.findOne({ where: { id } });
+      return res.status(200).json(userExist);
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Falha ao processar requisição',
+      });
+    }
+  };
+
 
   login = async (req: Request, res: Response) => {
     const { emailPhone, password } = req.body;

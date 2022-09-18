@@ -15,9 +15,8 @@ export default class UserController {
 
       if (emailFind || phoneFind) {
         return res.status(409).json({
-          message: `${
-            emailFind ? 'Email' : 'Número de telefone'
-          } já cadastrado`,
+          message: `${emailFind ? 'Email' : 'Número de telefone'
+            } já cadastrado`,
         });
       }
       const user = new User();
@@ -69,7 +68,7 @@ export default class UserController {
       });
     }
   };
-  getOneUser = async (req: Request,res: Response) => {
+  getOneUser = async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.id);
       const userRepository = connection.getRepository(User);
@@ -128,7 +127,7 @@ export default class UserController {
 
   updateUser = async (req: Request, res: Response) => {
     try {
-      const { user_id, password } = req.body;
+      const { user_id, name, email, phone, admin, password, state, city, superAdmin } = req.body;
       const userRepository = connection.getRepository(User);
       const user = await userRepository.findOne({
         where: { id: Number(user_id) },
@@ -136,7 +135,14 @@ export default class UserController {
 
       if (user) {
         user.password = password;
-        await userRepository.update({ id: Number(user.id) }, { ...req.body });
+        user.email = email;
+        user.city = city;
+        user.name = name;
+        user.state = state;
+        user.admin = admin;
+        user.phone = phone;
+        user.superAdmin = superAdmin;
+        await userRepository.update({ id: Number(user.id) }, { ...user });
         return res
           .status(200)
           .json({ message: 'Usuário atualizado com sucesso' });

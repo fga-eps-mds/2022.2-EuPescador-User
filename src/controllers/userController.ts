@@ -1,8 +1,9 @@
 /* eslint-disable camelcase */
 import { Request, Response } from 'express';
+import { hash } from 'bcrypt';
 import AuthUser from '../middleware/authUser';
-import { connection } from '../config/database';
-import { User } from '../models/user';
+import { connection } from '../database';
+import { User } from '../database/entities/user';
 
 export default class UserController {
   createUser = async (req: Request, res: Response) => {
@@ -15,16 +16,19 @@ export default class UserController {
 
       if (emailFind || phoneFind) {
         return res.status(409).json({
-          message: `${emailFind ? 'Email' : 'Número de telefone'
-            } já cadastrado`,
+          message: `${
+            emailFind ? 'Email' : 'Número de telefone'
+          } já cadastrado`,
         });
       }
+
+      const hashedPassword = await hash(password, 10);
       const user = new User();
       user.email = email;
       user.city = city;
       user.name = name;
       user.state = state;
-      user.password = password;
+      user.password = hashedPassword;
       user.admin = admin;
       user.phone = phone;
       user.superAdmin = superAdmin;
@@ -51,6 +55,7 @@ export default class UserController {
 
       return res.status(200).json(user);
     } catch (error) {
+      console.log(error);
       return res.status(400).json({
         message: 'Falha no sistema ao cadastrar, tente novamente!',
       });
@@ -68,9 +73,10 @@ export default class UserController {
       });
     }
   };
+
   getOneUser = async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const { id } = req.params;
       const userRepository = connection.getRepository(User);
       const userExist = await userRepository.findOne({ where: { id } });
       return res.status(200).json(userExist);
@@ -80,7 +86,6 @@ export default class UserController {
       });
     }
   };
-
 
   login = async (req: Request, res: Response) => {
     const { emailPhone, password } = req.body;
@@ -127,10 +132,20 @@ export default class UserController {
 
   updateUser = async (req: Request, res: Response) => {
     try {
-      const { user_id, name, email, phone, admin, password, state, city, superAdmin } = req.body;
+      const {
+        user_id,
+        name,
+        email,
+        phone,
+        admin,
+        password,
+        state,
+        city,
+        superAdmin,
+      } = req.body;
       const userRepository = connection.getRepository(User);
       const user = await userRepository.findOne({
-        where: { id: Number(user_id) },
+        where: { id: user_id },
       });
 
       if (user) {
@@ -142,7 +157,7 @@ export default class UserController {
         user.admin = admin;
         user.phone = phone;
         user.superAdmin = superAdmin;
-        await userRepository.update({ id: Number(user.id) }, { ...user });
+        await userRepository.update({ id: user.id }, { ...user });
         return res
           .status(200)
           .json({ message: 'Usuário atualizado com sucesso' });

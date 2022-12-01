@@ -15,7 +15,7 @@ services:
       - "4000"
     ports:
       - "4000:4000"
-    command: npm run dev
+    command: bash -c "npm run migration:run  && npm run dev"
   db:
     container_name: "postgresDbUser"
     image: "postgres:latest"

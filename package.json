@@ -9,9 +9,9 @@
     "build": "tsc -p .",
     "dev": "nodemon src/server.ts",
     "lint": "eslint \"**/*.{ts,tsx}\"",
-    "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/desk.ts migration:generate src/database/migrations/defaut",
-    "migration:run": "typeorm-ts-node-commonjs -d ./src/database/desk.ts migration:run",
-    "migration:revert": "typeorm-ts-node-commonjs -d ./src/database/desk.ts migration:revert",
+    "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:generate src/database/migrations/defaut",
+    "migration:run": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d ./src/database/index.ts migration:revert",
     "migration:create": "typeorm-ts-node-commonjs migration:create"
   },
   "repository": {

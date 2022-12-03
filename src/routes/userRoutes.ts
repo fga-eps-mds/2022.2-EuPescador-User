@@ -14,7 +14,7 @@ userRoutes.get('/', (req: Request, res: Response) => {
 });
 
 userRoutes.get('/user/:id', (req: Request, res: Response) => {
-  userController.getOneUser(req,res);
+  userController.getOneUser(req, res);
 });
 
 userRoutes.post('/login', (req: Request, res: Response) => {

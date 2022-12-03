@@ -1,9 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { DataSource } from 'typeorm';
 
-import { User } from './entities/user';
-import { Token } from './entities/token';
-
 export const connection = new DataSource({
   type: 'postgres',
   host: process.env.POSTGRES_HOST || 'db',

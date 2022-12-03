@@ -55,7 +55,6 @@ export default class UserController {
 
       return res.status(200).json(user);
     } catch (error) {
-      console.log(error);
       return res.status(400).json({
         message: 'Falha no sistema ao cadastrar, tente novamente!',
       });

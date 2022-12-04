@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Request, Response } from 'express';
-import { hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import AuthUser from '../middleware/authUser';
 import { connection } from '../database';
 import { User } from '../database/entities/user';
@@ -100,12 +100,14 @@ export default class UserController {
           message: 'Usuário não encontado: Email ou telefone inválido!',
         });
       }
+      const pass = String(user.password);
+      const mathPass = await compare(password, pass);
 
-      if (password !== user.password) {
+      if (!mathPass) {
         return res.status(401).json({ message: 'Senha inválida' });
       }
 
-      const token = await authenticateUser.generateToken({
+      const token = authenticateUser.generateToken({
         id: user.id,
         email: user.email,
         password: user.password,

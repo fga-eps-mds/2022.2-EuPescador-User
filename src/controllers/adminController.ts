@@ -1,15 +1,14 @@
 /* eslint-disable consistent-return */
 import { Request, Response } from 'express';
-// import AuthUser from '../middleware/authUser';
-import { connection } from '../config/database';
-import { User } from '../models/user';
+import { connection } from '../database';
+import User from '../database/entities/user';
 
 export default class AdminController {
   deleteUser = async (req: Request, res: Response) => {
     try {
       // const { email, token, city, name, state, phone } = await req.body;
       const token = req.headers.authorization?.split(' ')[1];
-      const id = Number(req.params.id);
+      const { id } = req.params;
       const userRepository = connection.getRepository(User);
       const userExist = await userRepository.findOne({ where: { id } });
 

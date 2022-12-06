@@ -1,7 +1,5 @@
 /* eslint-disable import/prefer-default-export */
 import { DataSource } from 'typeorm';
-import { User } from '../models/user';
-import { Token } from '../models/token';
 
 export const connection = new DataSource({
   type: 'postgres',
@@ -10,8 +8,8 @@ export const connection = new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [User, Token],
-  synchronize: true,
+  entities: [`${__dirname}/**/entities/*.{ts,js}`],
+  migrations: [`${__dirname}/**/migrations/*.{ts,js}`],
   logging: false,
   extra: process.env.POSTGRES_HOST
     ? {
@@ -19,5 +17,5 @@ export const connection = new DataSource({
           rejectUnauthorized: false,
         },
       }
-    : { ssl: false},
+    : { ssl: false },
 });

@@ -1,12 +1,12 @@
 import { Response, Request } from 'express';
 import AuthUser from '../../src/middleware/authUser';
 import UserController from '../../src/controllers/userController';
-import { User } from '../../src/models/user';
-import { connection } from '../../src/config/database';
+import User from '../../src/database/entities/user';
+import { connection } from '../../src/database';
 
 const userController = new UserController();
 const userMock = {
-  id: 1,
+  id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
   email: 'natan@gmail.com',
   password: '123',
   phone: '56565777',
@@ -48,7 +48,9 @@ describe('Test Create User function', () => {
     userRepository.findOne = jest.fn();
     jest
       .spyOn(userRepository, 'save')
-      .mockImplementationOnce(() => Promise.resolve({ id: 1 }));
+      .mockImplementationOnce(() =>
+        Promise.resolve({ id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec' })
+      );
     const res = await userController.createUser(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(200);
   });
@@ -168,7 +170,7 @@ describe('Test Login function', () => {
   it('should get a statusCode 200 if login with the right data', async () => {
     const mockRequest = {} as Request;
     mockRequest.body = {
-      id: 1,
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
       email: 'natan@gmail.com',
       password: '123',
       phone: '56565777',
@@ -184,7 +186,9 @@ describe('Test Login function', () => {
     userRepository.findOne = jest.fn();
     jest
       .spyOn(userRepository, 'save')
-      .mockImplementationOnce(() => Promise.resolve({ id: 1 }));
+      .mockImplementationOnce(() =>
+        Promise.resolve({ id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec' })
+      );
     await userController.createUser(mockRequest, response);
 
     userRepository.findOne = jest.fn().mockImplementationOnce(() => ({

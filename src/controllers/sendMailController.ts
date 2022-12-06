@@ -2,9 +2,9 @@
 import { Request, Response } from 'express';
 import { FindOptionsWhere } from 'typeorm';
 import { sendMailService } from '../services/sendMailService';
-import { connection } from '../config/database';
-import { User } from '../models/user';
-import { Token } from '../models/token';
+import { connection } from '../database';
+import User from '../database/entities/user';
+import Token from '../database/entities/token';
 
 export default class SendMailController {
   async sendMail(req: Request, res: Response) {
@@ -20,7 +20,7 @@ export default class SendMailController {
 
       const token = new Token();
       token.value = tokenValue;
-      token.user_id = String(user!.id);
+      token.user_id = user!.id;
 
       await tokenRepository.save(token);
     } catch (error) {

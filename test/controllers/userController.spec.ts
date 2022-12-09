@@ -99,7 +99,7 @@ describe('Test Create User function', () => {
     expect(res.status).toHaveBeenCalledWith(409);
   });
 
-  it('should get a statusCode 400 if request failed', async () => {
+  it('Should get a statusCode 400 if request failed', async () => {
     const mockRequest = {} as Request;
     mockRequest.body = {
       email: 'natan@gmail.com',
@@ -130,12 +130,7 @@ describe('Test Get All Users function', () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlM2IwYWJlLTk' +
-        'wZWYtNDZkMi1iYTRkLTJhYmM4NDJmMGJkNiIsImFkbWluIjp0cnVlLCJzdXBlckFkbW' +
-        'luIjp0cnVlLCJpYXQiOjE2NzA0NjI2NTksImV4cCI6MTY3MzA1NDY1OSwic3ViIjoiN' +
-        'WUzYjBhYmUtOTBlZi00NmQyLWJhNGQtMmFiYzg0MmYwYmQ2In0.k1Jtmam7V12GLIHk' +
-        'zP2RrkAJOMHFQDYTtPaoA2HAuHw',
+      authorization: 'Bearer mockToken',
     };
 
     const userRepository = connection.getRepository(User);
@@ -155,15 +150,15 @@ describe('Test Get All Users function', () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlM2IwYWJlLTk' +
-        'wZWYtNDZkMi1iYTRkLTJhYmM4NDJmMGJkNiIsImFkbWluIjp0cnVlLCJzdXBlckFkbW' +
-        'luIjp0cnVlLCJpYXQiOjE2NzA0NjI2NTksImV4cCI6MTY3MzA1NDY1OSwic3ViIjoiN' +
-        'WUzYjBhYmUtOTBlZi00NmQyLWJhNGQtMmFiYzg0MmYwYmQ2In0.k1Jtmam7V12GLIHk' +
-        'zP2RrkAJOMHFQDYTtPaoA2HAuHw',
+      authorization: 'Bearer mockToken',
     };
 
     const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'save')
+      .mockImplementationOnce(() =>
+        Promise.resolve({ id: 'c465c64d-0820-49d8-bbdd-02bc3c05c545' })
+      );
 
     userRepository.find = jest.fn().mockResolvedValueOnce([userMock]);
     const saida = {
@@ -181,12 +176,7 @@ describe('Test Get All Users function', () => {
     const mockRequest = {} as Request;
 
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlM2IwYWJlLTk' +
-        'wZWYtNDZkMi1iYTRkLTJhYmM4NDJmMGJkNiIsImFkbWluIjp0cnVlLCJzdXBlckFkbW' +
-        'luIjp0cnVlLCJpYXQiOjE2NzA0NjI2NTksImV4cCI6MTY3MzA1NDY1OSwic3ViIjoiN' +
-        'WUzYjBhYmUtOTBlZi00NmQyLWJhNGQtMmFiYzg0MmYwYmQ2In0.k1Jtmam7V12GLIHk' +
-        'zP2RrkAJOMHFQDYTtPaoA2HAuHw',
+      authorization: 'Bearer mockToken',
     };
     const saida = {
       id: 'true',
@@ -212,12 +202,7 @@ describe('Test Get User function', () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlM2IwYWJlLTk' +
-        'wZWYtNDZkMi1iYTRkLTJhYmM4NDJmMGJkNiIsImFkbWluIjp0cnVlLCJzdXBlckFkbW' +
-        'luIjp0cnVlLCJpYXQiOjE2NzA0NjI2NTksImV4cCI6MTY3MzA1NDY1OSwic3ViIjoiN' +
-        'WUzYjBhYmUtOTBlZi00NmQyLWJhNGQtMmFiYzg0MmYwYmQ2In0.k1Jtmam7V12GLIHk' +
-        'zP2RrkAJOMHFQDYTtPaoA2HAuHw',
+      authorization: 'Bearer mockToken',
     };
 
     mockRequest.params = {
@@ -241,12 +226,7 @@ describe('Test Get User function', () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlM2IwYWJlLTk' +
-        'wZWYtNDZkMi1iYTRkLTJhYmM4NDJmMGJkNiIsImFkbWluIjp0cnVlLCJzdXBlckFkbW' +
-        'luIjp0cnVlLCJpYXQiOjE2NzA0NjI2NTksImV4cCI6MTY3MzA1NDY1OSwic3ViIjoiN' +
-        'WUzYjBhYmUtOTBlZi00NmQyLWJhNGQtMmFiYzg0MmYwYmQ2In0.k1Jtmam7V12GLIHk' +
-        'zP2RrkAJOMHFQDYTtPaoA2HAuHw',
+      authorization: 'Bearer mockToken',
     };
 
     mockRequest.params = {
@@ -270,12 +250,7 @@ describe('Test Get User function', () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     mockRequest.headers = {
-      authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlM2IwYWJlLTk' +
-        'wZWYtNDZkMi1iYTRkLTJhYmM4NDJmMGJkNiIsImFkbWluIjp0cnVlLCJzdXBlckFkbW' +
-        'luIjp0cnVlLCJpYXQiOjE2NzA0NjI2NTksImV4cCI6MTY3MzA1NDY1OSwic3ViIjoiN' +
-        'WUzYjBhYmUtOTBlZi00NmQyLWJhNGQtMmFiYzg0MmYwYmQ2In0.k1Jtmam7V12GLIHk' +
-        'zP2RrkAJOMHFQDYTtPaoA2HAuHw',
+      authorization: 'Bearer mockToken',
     };
 
     mockRequest.params = {
@@ -360,6 +335,282 @@ describe('Test Login function', () => {
 
     userRepository.findOne = jest.fn();
     const res = await userController.login(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+});
+
+describe('Test Update user', () => {
+  it('should get a statusCode 401 if user not authorized', async () => {
+    const mockRequest = {} as Request;
+    mockRequest.body = {
+      name: 'Weslley',
+      email: 'weslley17e@gmail.com',
+      phone: '11961824141',
+      password: 'pass',
+      state: 'Distrito Federal',
+      city: 'Brasília',
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    const saida = {
+      id: '53dd2dfe-a4d',
+      admin: false,
+      superAdmin: false,
+    };
+
+    const userRepository = connection.getRepository(User);
+
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    userRepository.findOne = jest.fn().mockResolvedValueOnce(userMock);
+
+    const response = mockResponse();
+    const res = await userController.updateUser(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('should get a statusCode 409 if user changes existing email', async () => {
+    const saida = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+    const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(userMock));
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    const mockRequest = {} as Request;
+
+    mockRequest.body = {
+      name: 'Weslley',
+      email: 'natan2@gmail.com',
+      phone: '111222222222',
+      password: 'pass',
+      state: 'Distrito Federal',
+      city: 'Brasília',
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUser(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(409);
+  });
+
+  it('should get a statusCode 409 if user changes existing cell phone', async () => {
+    const saida = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+    const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(userMock));
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    const mockRequest = {} as Request;
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '565657737',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUser(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(409);
+  });
+
+  it('should get a statusCode 500 if request failed', async () => {
+    const saida = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+    const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(userMock));
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    const mockRequest = {} as Request;
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '56565777',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUser(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+});
+
+describe('Test Update user by id', () => {
+  it('should get a statusCode 401 if user not authorized', async () => {
+    const mockRequest = {} as Request;
+    mockRequest.body = {
+      name: 'Weslley',
+      email: 'weslley17e@gmail.com',
+      phone: '11961824141',
+      password: 'pass',
+      state: 'Distrito Federal',
+      city: 'Brasília',
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    mockRequest.params = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+    };
+
+    const saida = {
+      id: '53dd2dfe-a4d',
+      admin: false,
+      superAdmin: false,
+    };
+
+    const userRepository = connection.getRepository(User);
+
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    userRepository.findOne = jest.fn().mockResolvedValueOnce(userMock);
+
+    const response = mockResponse();
+    const res = await userController.updateUserByID(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('should get a statusCode 409 if user changes existing email', async () => {
+    const saida = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+    const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(userMock));
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    const mockRequest = {} as Request;
+
+    mockRequest.body = {
+      name: 'Weslley',
+      email: 'natan2@gmail.com',
+      phone: '111222222222',
+      password: 'pass',
+      state: 'Distrito Federal',
+      city: 'Brasília',
+    };
+
+    mockRequest.params = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUserByID(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(409);
+  });
+
+  it('should get a statusCode 409 if user changes existing cell phone', async () => {
+    const saida = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+    const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(userMock));
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+    const mockRequest = {} as Request;
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '565657737',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    mockRequest.params = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUserByID(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(409);
+  });
+});
+
+describe('Test Delete user', () => {
+  it('should get a statusCode 401 if user not authorized', async () => {
+    const mockRequest = {} as Request;
+    mockRequest.body = {
+      name: 'Weslley',
+      email: 'weslley17e@gmail.com',
+      phone: '11961824141',
+      password: 'pass',
+      state: 'Distrito Federal',
+      city: 'Brasília',
+    };
+
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    mockRequest.params = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+    };
+
+    const saida = {
+      id: '53dd2dfe-a4d',
+      admin: false,
+      superAdmin: false,
+    };
+
+    jwt.decode = jest.fn().mockImplementation(() => saida);
+
+    const response = mockResponse();
+    const res = await userController.deleteUser(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 });

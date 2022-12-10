@@ -40,12 +40,4 @@ userRoutes.delete(
   }
 );
 
-userRoutes.get(
-  '/authToken/:token',
-  authenticateUser.auth,
-  (req: Request, res: Response) => {
-    userController.authToken(req, res);
-  }
-);
-
 export default userRoutes;

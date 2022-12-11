@@ -35,5 +35,13 @@ export default class User {
     if (!this.id) {
       this.id = uuidV4();
     }
+
+    if (!this.admin) {
+      this.admin = false;
+    }
+
+    if (!this.superAdmin) {
+      this.superAdmin = false;
+    }
   }
 }

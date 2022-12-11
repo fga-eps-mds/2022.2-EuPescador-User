@@ -8,8 +8,7 @@ import User from '../database/entities/user';
 export default class UserController {
   createUser = async (req: Request, res: Response) => {
     try {
-      const { name, email, phone, admin, password, state, city, superAdmin } =
-        await req.body;
+      const { name, email, phone, password, state, city } = await req.body;
       const userRepository = connection.getRepository(User);
       const emailFind = await userRepository.findOne({ where: { email } });
       const phoneFind = await userRepository.findOne({ where: { phone } });
@@ -29,31 +28,20 @@ export default class UserController {
       user.name = name;
       user.state = state;
       user.password = hashedPassword;
-      user.admin = admin;
       user.phone = phone;
-      user.superAdmin = superAdmin;
-
-      if (
-        user.admin &&
-        req.body.token !== process.env.RESEARCHER_CONFIRMATION_CODE
-      ) {
-        return res
-          .status(401)
-          .json({ message: 'Código de pesquisador invalido!' });
-      }
-
-      if (
-        user.superAdmin &&
-        req.body.superToken !== process.env.ADMIN_CONFIRMATION_CODE
-      ) {
-        return res
-          .status(401)
-          .json({ message: 'Código de administrador invalido!' });
-      }
 
       await userRepository.save(user);
 
-      return res.status(200).json(user);
+      const responseRegister = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        state: user.state,
+        city: user.city,
+        phone: user.phone,
+      };
+
+      return res.status(200).json(responseRegister);
     } catch (error) {
       return res.status(400).json({
         message: 'Falha no sistema ao cadastrar, tente novamente!',
@@ -61,10 +49,31 @@ export default class UserController {
     }
   };
 
-  getAllUsers = async (res: Response) => {
+  getAllUsers = async (req: Request, res: Response) => {
+    const headerBearer = req.headers.authorization;
+    const token = String(headerBearer?.split(' ')[1]);
+
     try {
+      const authenticateUser = new AuthUser();
+      const { admin } = authenticateUser.decodeToken(token);
+
+      if (!admin) {
+        res.status(401).json({ message: 'Token invalido' });
+      }
+
       const userRepository = connection.getRepository(User);
-      const data = await userRepository.find({});
+      const data = await userRepository.find({
+        select: [
+          'id',
+          'admin',
+          'superAdmin',
+          'name',
+          'email',
+          'phone',
+          'state',
+          'city',
+        ],
+      });
       return res.status(200).json(data);
     } catch (error) {
       return res.status(500).json({
@@ -74,10 +83,32 @@ export default class UserController {
   };
 
   getOneUser = async (req: Request, res: Response) => {
+    const headerBearer = req.headers.authorization;
+    const token = String(headerBearer?.split(' ')[1]);
+
     try {
-      const { id } = req.params;
+      const authenticateUser = new AuthUser();
+      const { admin, id } = authenticateUser.decodeToken(token);
+      const idRouter = req.params.id;
+      if (!admin && id !== idRouter) {
+        res.status(401).json({ message: 'Token invalido!' });
+      }
+
       const userRepository = connection.getRepository(User);
-      const userExist = await userRepository.findOne({ where: { id } });
+      const userExist = await userRepository.findOne({
+        where: { id },
+        select: [
+          'id',
+          'admin',
+          'superAdmin',
+          'name',
+          'email',
+          'phone',
+          'state',
+          'city',
+        ],
+      });
+
       return res.status(200).json(userExist);
     } catch (error) {
       return res.status(500).json({
@@ -96,23 +127,21 @@ export default class UserController {
         (await userRepository.findOne({ where: { phone: emailPhone } }));
 
       if (!user) {
-        return res.status(404).json({
-          message: 'Usuário não encontado: Email ou telefone inválido!',
+        return res.status(401).json({
+          message: 'Usuário não encontado',
         });
       }
       const pass = String(user.password);
       const mathPass = await compare(password, pass);
 
       if (!mathPass) {
-        return res.status(401).json({ message: 'Senha inválida' });
+        return res.status(401).json({ message: 'Usuário não encontado' });
       }
 
       const token = authenticateUser.generateToken({
-        id: user.id,
-        email: user.email,
-        password: user.password,
-        admin: user.admin,
-        superAdmin: user.superAdmin,
+        id: String(user.id),
+        admin: Boolean(user.admin),
+        superAdmin: Boolean(user.superAdmin),
       });
 
       return res.status(200).json({
@@ -132,40 +161,143 @@ export default class UserController {
   };
 
   updateUser = async (req: Request, res: Response) => {
-    try {
-      const {
-        user_id,
-        name,
-        email,
-        phone,
-        admin,
-        password,
-        state,
-        city,
-        superAdmin,
-      } = req.body;
-      const userRepository = connection.getRepository(User);
-      const user = await userRepository.findOne({
-        where: { id: user_id },
-      });
+    const headerBearer = req.headers.authorization;
+    const token = String(headerBearer?.split(' ')[1]);
 
-      if (user) {
-        user.password = password;
-        user.email = email;
-        user.city = city;
-        user.name = name;
-        user.state = state;
-        user.admin = admin;
-        user.phone = phone;
-        user.superAdmin = superAdmin;
-        await userRepository.update({ id: user.id }, { ...user });
-        return res
-          .status(200)
-          .json({ message: 'Usuário atualizado com sucesso' });
+    try {
+      const authenticateUser = new AuthUser();
+      const { id } = authenticateUser.decodeToken(token);
+      const { name, email, phone, state, city } = req.body;
+      const userRepository = connection.getRepository(User);
+      const userExistEdit = await userRepository.findOne({ where: { id } });
+      const emailTaken = await userRepository.findOne({ where: { email } });
+      const phoneTaken = await userRepository.findOne({ where: { phone } });
+
+      if (userExistEdit?.id !== id) {
+        return res.status(401).json({
+          message: 'Você não tem permissão de editar um usuário',
+        });
       }
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+
+      if (emailTaken && emailTaken.email !== email) {
+        return res.status(409).json({
+          message: 'Email já cadastrado!',
+        });
+      }
+
+      if (phoneTaken && phoneTaken.phone !== phone) {
+        return res.status(409).json({
+          message: 'Número de telefone já cadastrado!',
+        });
+      }
+      userExistEdit.name = name;
+      userExistEdit.email = email;
+      userExistEdit.phone = phone;
+      userExistEdit.state = state;
+      userExistEdit.city = city;
+      await userRepository.update(id, userExistEdit);
+
+      delete userExistEdit.password;
+      return res.status(200).json(userExistEdit);
     } catch (error) {
-      return res.status(400).json({ message: 'Falha ao atualizar usuário' });
+      return res.status(500).json({
+        message: 'Falha no sistema ao editar, tente novamente!',
+      });
     }
   };
+
+  updateUserByID = async (req: Request, res: Response) => {
+    const headerBearer = req.headers.authorization;
+    const token = String(headerBearer?.split(' ')[1]);
+
+    try {
+      const authenticateUser = new AuthUser();
+      const { superAdmin } = authenticateUser.decodeToken(token);
+      const { id } = req.params;
+      const { name, email, phone, state, city, admin } = req.body;
+      const superAdminEdit = req.body.superAdmin;
+      const userRepository = connection.getRepository(User);
+      const userExistEdit = await userRepository.findOne({ where: { id } });
+      const emailTaken = await userRepository.findOne({ where: { email } });
+      const phoneTaken = await userRepository.findOne({ where: { phone } });
+
+      if (!superAdmin) {
+        return res.status(401).json({
+          message: 'Você não tem permissão de editar um usuário',
+        });
+      }
+
+      if (emailTaken && emailTaken.email !== email) {
+        return res.status(409).json({
+          message: 'Email já cadastrado!',
+        });
+      }
+
+      if (phoneTaken && phoneTaken.phone !== phone) {
+        return res.status(409).json({
+          message: 'Número de telefone já cadastrado!',
+        });
+      }
+
+      if (!userExistEdit) {
+        return res.status(404).json({
+          message: 'O usuário que você quer editar não existe',
+        });
+      }
+
+      userExistEdit.name = name;
+      userExistEdit.email = email;
+      userExistEdit.phone = phone;
+      userExistEdit.state = state;
+      userExistEdit.city = city;
+      userExistEdit.admin = admin;
+      userExistEdit.superAdmin = superAdminEdit;
+      await userRepository.update(id, userExistEdit);
+      delete userExistEdit.password;
+      return res.status(200).json(userExistEdit);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: 'Falha no sistema ao editar, tente novamente!',
+      });
+    }
+  };
+
+  deleteUser = async (req: Request, res: Response) => {
+    const headerBearer = req.headers.authorization;
+    const token = String(headerBearer?.split(' ')[1]);
+
+    try {
+      const authenticateUser = new AuthUser();
+      const { superAdmin } = authenticateUser.decodeToken(token);
+      const { id } = req.params;
+      const userRepository = connection.getRepository(User);
+      const userExist = await userRepository.findOne({ where: { id } });
+
+      if (!superAdmin) {
+        return res.status(401).json({
+          message: 'Você não tem autorização para deletar usuários',
+        });
+      }
+
+      if (!userExist) {
+        return res.status(404).json({
+          message: 'Usuário não encontrado',
+        });
+      }
+
+      await userRepository.remove(userExist);
+      delete userExist.password;
+      return res.status(200).json(userExist);
+    } catch (error) {
+      return res.status(400).json({
+        message: 'Falha no sistema ao deletar, tente novamente!',
+      });
+    }
+  };
+
+  authToken = async (req: Request, res: Response) =>
+    res.status(200).json({
+      message: 'Token valido!',
+    });
 }

@@ -8,6 +8,10 @@ interface Idata {
   admin: boolean;
   superAdmin: boolean;
 }
+
+interface RequestWithUserRole extends Request {
+  user?: Idata;
+}
 export default class AuthUser {
   generateToken(data: Idata) {
     return sign(data, process.env.AUTH_CONFIG_SECRET as string, {
@@ -25,32 +29,40 @@ export default class AuthUser {
     return decodeToken;
   }
 
-  async auth(request: Request, response: Response, next: NextFunction) {
-    let headerBearer;
-    try{
-      headerBearer = request.headers.authorization;
-    }catch{
+  async auth(
+    request: RequestWithUserRole,
+    response: Response,
+    next: NextFunction
+  ) {
+    const headerBearer = request.headers.authorization;
+
+    if (!headerBearer) {
       response.status(401).json({ message: 'Token obrigatorio' });
-      throw new Error('Token invalido!');
     }
 
-    const token = String(headerBearer?.split(' ')[1]);
+    const token = headerBearer?.split(' ')[1];
+    let decodeToken;
+
     try {
-      verify(token, process.env.AUTH_CONFIG_SECRET as string);
-      const { id, admin, superAdmin } = decode(token) as Idata;
-      const userRepository = connection.getRepository(User);
-      const user = await userRepository.findOne({
-        where: { id, admin, superAdmin },
-      });
-
-      if (!user) {
-        response.status(401).json({ message: 'Token invalido' });
-      }
-
-      next();
+      verify(token as string, process.env.AUTH_CONFIG_SECRET as string);
+      decodeToken = decode(token as string);
     } catch {
-      response.status(401).json({ message: 'Token invalido' });
-      throw new Error('Token invalido');
+      response.status(401).json({ message: 'Token invalido!' });
     }
+
+    const { id, admin, superAdmin } = decodeToken as Idata;
+    const userRepository = connection.getRepository(User);
+
+    const user = await userRepository.findOne({
+      where: { id, admin, superAdmin },
+    });
+
+    if (!user) {
+      response.status(401).json({ message: 'Token invalido!' });
+    }
+
+    request.user = decodeToken as Idata;
+
+    next();
   }
 }

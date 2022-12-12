@@ -26,9 +26,10 @@ export default class AuthUser {
   }
 
   async auth(request: Request, response: Response, next: NextFunction) {
-    const headerBearer = request.headers.authorization;
-
-    if (!headerBearer) {
+    let headerBearer;
+    try{
+      headerBearer = request.headers.authorization;
+    }catch{
       response.status(401).json({ message: 'Token obrigatorio' });
       throw new Error('Token invalido!');
     }

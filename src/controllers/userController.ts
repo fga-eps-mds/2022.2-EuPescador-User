@@ -5,6 +5,16 @@ import AuthUser from '../middleware/authUser';
 import { connection } from '../database';
 import User from '../database/entities/user';
 
+interface Idata {
+  id: string;
+  admin: boolean;
+  superAdmin: boolean;
+}
+
+interface RequestWithUserRole extends Request {
+  user?: Idata;
+}
+
 export default class UserController {
   createUser = async (req: Request, res: Response) => {
     try {
@@ -49,40 +59,38 @@ export default class UserController {
     }
   };
 
-  getAllUsers = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  getAllUsers = async (req: RequestWithUserRole, res: Response) => {
+    let data;
+    let header;
+    if (!req.user?.admin) {
+      header = { status: 401, message: 'Token invalido!' };
+    }
     try {
-      const authenticateUser = new AuthUser();
-      const { admin } = authenticateUser.decodeToken(token);
-
-      if (!admin) {
-        res.status(401).json({ message: 'Token invalido' });
-      }
-
       const userRepository = connection.getRepository(User);
-      const data = await userRepository.find({
+      data = await userRepository.find({
         select: [
           'id',
-          'admin',
-          'superAdmin',
           'name',
           'email',
           'phone',
           'state',
           'city',
+          'admin',
+          'superAdmin',
         ],
       });
-      return res.status(200).json(data);
     } catch (error) {
-      return res.status(500).json({
-        message: 'Falha ao processar requisição',
-      });
+      header = { status: 401, message: 'Token invalido!' };
+    }
+
+    if (header?.status !== 200) {
+      res.status(Number(header?.status)).json(header?.message);
+    } else {
+      res.status(200).json(data);
     }
   };
 
-  getOneUser = async (req: Request, res: Response) => {
+  getOneUser = async (req: RequestWithUserRole, res: Response) => {
     const headerBearer = req.headers.authorization;
     const token = String(headerBearer?.split(' ')[1]);
 

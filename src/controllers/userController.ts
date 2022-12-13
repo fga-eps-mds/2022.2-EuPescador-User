@@ -61,9 +61,8 @@ export default class UserController {
 
   getAllUsers = async (req: RequestWithUserRole, res: Response) => {
     let data;
-    let header;
     if (!req.user?.admin) {
-      header = { status: 401, message: 'Token invalido!' };
+      res.status(401);
     }
     try {
       const userRepository = connection.getRepository(User);
@@ -80,14 +79,10 @@ export default class UserController {
         ],
       });
     } catch (error) {
-      header = { status: 401, message: 'Token invalido!' };
+      res.status(401);
     }
 
-    if (header?.status !== 200) {
-      res.status(Number(header?.status)).json(header?.message);
-    } else {
-      res.status(200).json(data);
-    }
+    res.status(200).json(data);
   };
 
   getOneUser = async (req: RequestWithUserRole, res: Response) => {

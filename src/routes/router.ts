@@ -1,13 +1,12 @@
 import { Router } from 'express';
-import adminRoutes from './adminRoutes';
-// Rotas
 import userRoutes from './userRoutes';
 import sendMailRoutes from './sendMailRoutes';
+import authRouters from './authRouters';
 
 const router = Router();
 
+router.use('/', authRouters);
 router.use('/user', userRoutes);
-router.use('/admin', adminRoutes);
 router.use('/recover-password', sendMailRoutes);
 
 export default router;

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import app from './app';
-import { connection } from './config/database';
+import { connection } from './database';
 
 connection
   .initialize()

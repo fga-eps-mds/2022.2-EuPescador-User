@@ -35,30 +35,25 @@ export default class AuthUser {
     next: NextFunction
   ) {
     const headerBearer = request.headers.authorization;
-
     if (!headerBearer) {
       response.status(401).json({ message: 'Token obrigatorio' });
     }
-
     const token = headerBearer?.split(' ')[1];
     let decodeToken;
 
     try {
       verify(token as string, process.env.AUTH_CONFIG_SECRET as string);
       decodeToken = decode(token as string);
+      const { id, admin, superAdmin } = decodeToken as Idata;
+      const userRepository = connection.getRepository(User);
+      const user = await userRepository.findOne({
+        where: { id, admin, superAdmin },
+      });
+      if (!user) {
+        response.status(401);
+      }
     } catch {
-      response.status(401).json({ message: 'Token invalido!' });
-    }
-
-    const { id, admin, superAdmin } = decodeToken as Idata;
-    const userRepository = connection.getRepository(User);
-
-    const user = await userRepository.findOne({
-      where: { id, admin, superAdmin },
-    });
-
-    if (!user) {
-      response.status(401).json({ message: 'Token invalido!' });
+      response.status(401);
     }
 
     request.user = decodeToken as Idata;

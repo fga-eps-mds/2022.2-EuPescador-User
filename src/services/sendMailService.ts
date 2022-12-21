@@ -1,34 +1,31 @@
 /* eslint-disable import/prefer-default-export */
 import nodemailer, { Transporter } from 'nodemailer';
-import { generateToken } from '../utils/generateToken';
 
-export async function sendMailService(email: string) {
-  const token = generateToken();
-  const html = `
-    <p>Olá! Para recuperar sua senha utilize este token no seu aplicativo: <b>${token}</b></p>
-    <p>Caso você não tenha feito essa solicitação, apenas ignore esse e-mail.</p>
-    <br>
-    <p>Atensiosamente,</p>
-    <b>Equipe EuPescador</b>
-  `;
+export async function sendMailService(
+  email: string,
+  html: string,
+  title: string
+) {
+  try {
+    const transporter: Transporter = nodemailer.createTransport({
+      name: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_HOST),
+      auth: {
+        user: process.env.SMTP_LOGIN,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
 
-  const transporter: Transporter = nodemailer.createTransport({
-    name: 'smtp.gmail.com',
-    host: 'smtp.gmail.com',
-    port: 587,
-    auth: {
-      user: process.env.SENDER_EMAIL,
-      pass: process.env.SENDER_PASSWORD,
-    },
-  });
+    await transporter.sendMail({
+      from: `Eu Pescador <${process.env.SMTP_LOGIN}>`,
+      to: email,
+      subject: title,
+      html,
+    });
 
-  await transporter.sendMail({
-    from: `Eu Pescador <${process.env.SENDER_EMAIL}>`,
-    to: email,
-    subject: 'Recuperação de Senha',
-    html,
-  });
-  await transporter.verify().then(console.log).catch(console.error);
-
-  return token;
+    transporter.close();
+  } catch (err) {
+    throw new Error('Falha ao enviar email!');
+  }
 }

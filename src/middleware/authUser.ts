@@ -20,44 +20,39 @@ export default class AuthUser {
     });
   }
 
-  decodeToken(token: string): Idata {
-    const decodeToken = decode(token) as Idata;
-    if (!decodeToken) {
-      throw new Error('Token invalido!');
-    }
-
-    return decodeToken;
-  }
-
   async auth(
     request: RequestWithUserRole,
     response: Response,
     next: NextFunction
-  ) {
-    const headerBearer = request.headers.authorization;
-    if (!headerBearer) {
-      response.status(401).json({ message: 'Token obrigatorio' });
-    }
-    const token = headerBearer?.split(' ')[1];
+  ): Promise<Response | null> {
     let decodeToken;
+    let token;
+    let userExist;
 
     try {
+      token = request.headers.authorization?.split(' ')[1];
       verify(token as string, process.env.AUTH_CONFIG_SECRET as string);
       decodeToken = decode(token as string);
       const { id, admin, superAdmin } = decodeToken as Idata;
       const userRepository = connection.getRepository(User);
-      const user = await userRepository.findOne({
+      userExist = await userRepository.findOne({
         where: { id, admin, superAdmin },
+        select: ['id', 'admin', 'superAdmin'],
       });
-      if (!user) {
-        response.status(401);
-      }
-    } catch {
-      response.status(401);
+    } catch (err) {
+      return response.status(401).json({
+        message: 'Token inválido!',
+      });
     }
 
-    request.user = decodeToken as Idata;
+    if (!userExist) {
+      return response.status(401).json({
+        message: 'Token inválido!',
+      });
+    }
 
+    request.user = userExist as Idata;
     next();
+    return null;
   }
 }

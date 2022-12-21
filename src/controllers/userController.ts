@@ -104,19 +104,16 @@ export default class UserController {
   };
 
   getOneUser = async (req: RequestWithUserRole, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+    let userExist;
     try {
-      const authenticateUser = new AuthUser();
-      const { admin, id } = authenticateUser.decodeToken(token);
+      const { admin, id } = req.user as Idata;
       const idRouter = req.params.id;
       if (!admin && id !== idRouter) {
         res.status(401).json({ message: 'Token invalido!' });
       }
 
       const userRepository = connection.getRepository(User);
-      const userExist = await userRepository.findOne({
+      userExist = await userRepository.findOne({
         where: { id },
         select: [
           'id',
@@ -129,13 +126,19 @@ export default class UserController {
           'city',
         ],
       });
-
-      return res.status(200).json(userExist);
     } catch (error) {
       return res.status(500).json({
         message: 'Falha ao processar requisição',
       });
     }
+
+    if (!userExist) {
+      return res.status(404).json({
+        message: 'Usuário não encontrado',
+      });
+    }
+
+    return res.status(200).json(userExist);
   };
 
   login = async (req: Request, res: Response) => {
@@ -181,13 +184,9 @@ export default class UserController {
     }
   };
 
-  updateUser = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  updateUser = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const authenticateUser = new AuthUser();
-      const { id } = authenticateUser.decodeToken(token);
+      const { id } = req.user as Idata;
       const { name, email, phone, state, city } = req.body;
       const userRepository = connection.getRepository(User);
       const userExistEdit = await userRepository.findOne({ where: { id } });
@@ -199,7 +198,6 @@ export default class UserController {
           message: 'Você não tem permissão de editar um usuário',
         });
       }
-
       if (emailTaken && emailTaken.email !== email) {
         return res.status(409).json({
           message: 'Email já cadastrado!',
@@ -227,13 +225,9 @@ export default class UserController {
     }
   };
 
-  updateUserByID = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  updateUserByID = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const authenticateUser = new AuthUser();
-      const { superAdmin } = authenticateUser.decodeToken(token);
+      const { superAdmin } = req.user as Idata;
       const { id } = req.params;
       const { name, email, phone, state, city, admin } = req.body;
       const superAdminEdit = req.body.superAdmin;
@@ -276,21 +270,16 @@ export default class UserController {
       await userRepository.update(id, userExistEdit);
       delete userExistEdit.password;
       return res.status(200).json(userExistEdit);
-    } catch (error) {
-      console.log(error);
+    } catch {
       return res.status(500).json({
         message: 'Falha no sistema ao editar, tente novamente!',
       });
     }
   };
 
-  deleteUser = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  deleteUser = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const authenticateUser = new AuthUser();
-      const { superAdmin } = authenticateUser.decodeToken(token);
+      const { superAdmin } = req.user as Idata;
       const { id } = req.params;
       const userRepository = connection.getRepository(User);
       const userExist = await userRepository.findOne({ where: { id } });

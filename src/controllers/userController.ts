@@ -60,12 +60,19 @@ export default class UserController {
   };
 
   getAllUsers = async (req: RequestWithUserRole, res: Response) => {
-    const page = req.query.page !== undefined ? +req.query.page : 0;
-    const count = req.query.count !== undefined ? +req.query.count : 0;
+    const count = req.query?.count !== undefined ? +req.query.count : 0;
+    const page = req.query?.page !== undefined ? +req.query.page : 0;
     let totalPages = 1;
     let data;
-    if (!req.user?.admin) {
-      res.status(401);
+
+    const headerBearer = req.headers.authorization;
+    const token = String(headerBearer?.split(' ')[1]);
+
+    const authenticateUser = new AuthUser();
+    const { admin } = authenticateUser.decodeToken(token);
+    
+    if (!admin) {
+      return res.status(401).json({ message: 'Token invalido!' });
     }
     try {
       const userRepository = connection.getRepository(User);
@@ -90,10 +97,10 @@ export default class UserController {
       totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
 
     } catch (error) {
-      res.status(401);
+      return res.status(500);
     }
 
-    res.status(200).json({data, page, count, totalPages});
+    return res.status(200).json({data, page, count, totalPages});
   };
 
   getOneUser = async (req: RequestWithUserRole, res: Response) => {

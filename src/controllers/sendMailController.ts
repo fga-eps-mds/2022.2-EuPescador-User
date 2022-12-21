@@ -24,6 +24,10 @@ export default class SendMailController {
     try {
       const { email } = await req.body;
 
+      if (!email) {
+        return res.status(500).json({ message: 'email não enviado!' });
+      }
+
       const userRepository = connection.getRepository(User);
       const tokenRepository = connection.getRepository(Token);
       await tokenRepository.delete({ expires_at: LessThan(dayjs().toDate()) });

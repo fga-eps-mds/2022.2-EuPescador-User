@@ -91,12 +91,12 @@ export default class UserController {
       const { admin, id } = req.user as Idata;
       const idRouter = req.params.id;
       if (!admin && id !== idRouter) {
-        res.status(401).json({ message: 'Token invalido!' });
+        return res.status(401).json({ message: 'Token invalido!' });
       }
-
       const userRepository = connection.getRepository(User);
+      const userID = idRouter || id;
       userExist = await userRepository.findOne({
-        where: { id },
+        where: { id: userID },
         select: [
           'id',
           'admin',
@@ -125,6 +125,11 @@ export default class UserController {
 
   login = async (req: Request, res: Response) => {
     const { emailPhone, password } = req.body;
+
+    if (!emailPhone || !password) {
+      return res.status(400).json({ message: 'Dados inválidos' });
+    }
+
     const authenticateUser = new AuthUser();
     try {
       const userRepository = connection.getRepository(User);

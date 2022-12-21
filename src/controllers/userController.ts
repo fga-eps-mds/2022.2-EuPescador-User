@@ -60,29 +60,43 @@ export default class UserController {
   };
 
   getAllUsers = async (req: RequestWithUserRole, res: Response) => {
+    const count = req.query?.count !== undefined ? +req.query.count : 0;
+    const page = req.query?.page !== undefined ? +req.query.page : 0;
+    let totalPages = 1;
     let data;
-    if (!req.user?.admin) {
-      res.status(401);
+
+    const { admin } = req.user as Idata;
+    
+    if (!admin) {
+      return res.status(401).json({ message: 'Token invalido!' });
     }
     try {
       const userRepository = connection.getRepository(User);
-      data = await userRepository.find({
-        select: [
-          'id',
-          'name',
-          'email',
-          'phone',
-          'state',
-          'city',
-          'admin',
-          'superAdmin',
-        ],
-      });
+      data = await userRepository.createQueryBuilder("user")
+      .select([
+        'user.id',
+        'user.name',
+        'user.email',
+        'user.phone',
+        'user.state',
+        'user.city',
+        'user.admin',
+        'user.superAdmin',
+      ])
+      .skip((page - 1) * count)
+      .take(count)
+      .getMany();
+
+      const quantityOfUsers = await userRepository.createQueryBuilder("user")
+      .getCount();
+
+      totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
+
     } catch (error) {
       return res.status(500);
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json({data, page, count, totalPages});
   };
 
   getOneUser = async (req: RequestWithUserRole, res: Response) => {

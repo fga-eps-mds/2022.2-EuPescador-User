@@ -65,11 +65,7 @@ export default class UserController {
     let totalPages = 1;
     let data;
 
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
-    const authenticateUser = new AuthUser();
-    const { admin } = authenticateUser.decodeToken(token);
+    const { admin } = req.user as Idata;
     
     if (!admin) {
       return res.status(401).json({ message: 'Token invalido!' });

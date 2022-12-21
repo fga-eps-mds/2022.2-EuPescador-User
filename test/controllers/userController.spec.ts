@@ -134,71 +134,102 @@ describe('Test Create User function', () => {
 });
 
 describe('Test Get All User function', () => {
-  it('should get a statusCode 200 if request succeed', async () => {
+  it('should return a list of all users', async () => {
+
     const response = mockResponse();
-    const userRepository = connection.getRepository(User);
     const mockRequest = {} as RequestWithUserRole;
+
     mockRequest.headers = {
       authorization: 'Bearer mockToken',
     };
 
-    mockRequest.params = {
-      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
-    };
     mockRequest.user = {
       id: '12',
       admin: true,
       superAdmin: true,
     };
 
-    userRepository.find = jest.fn().mockResolvedValueOnce([userMock]);
+    mockRequest.query = {
+      count: '8',
+      page: '1'
+    }
 
-    const res = await userController.getAllUsers(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  it('should get a statusCode 401 if have admin header', async () => {
-    const response = mockResponse();
-    const mockRequest = {} as RequestWithUserRole;
-
-    const res = await userController.getAllUsers(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(401);
-  });
-
-  it('should get a statusCode 401 if have admin header', async () => {
-    const response = mockResponse();
-    const mockRequest = {} as RequestWithUserRole;
-
-    const res = await userController.getAllUsers(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(401);
-  });
-
-  it('should get a statusCode 500 if have intenal error', async () => {
-    const response = mockResponse();
-    const userRepository = connection.getRepository(User);
-    const mockRequest = {} as RequestWithUserRole;
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
-    };
-
-    mockRequest.params = {
-      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
-    };
-    mockRequest.user = {
-      id: '12',
-      admin: true,
-      superAdmin: true,
+    const createQueryBuilder: any = {
+      select: () => createQueryBuilder,
+      skip: () => createQueryBuilder,
+      take: () => createQueryBuilder,
+      getMany: () => [userMock],
     };
 
     jest
-      .spyOn(userRepository, 'find')
-      .mockImplementationOnce(() =>
-        Promise.reject(Error('Usuário não encontrado!'))
-      );
+    .spyOn(connection.getRepository(User), 'createQueryBuilder')
+    .mockImplementation(() => createQueryBuilder);
+
+    const userRepository = connection.getRepository(User);
+
+    userRepository.createQueryBuilder().getCount = jest.fn().mockResolvedValueOnce(1);
+
+    connection.getRepository(User)
 
     const res = await userController.getAllUsers(mockRequest, response);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+  })
+
+  it('should return 401 when try get all users with not admin account', async () => {
+    const response = mockResponse();
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+
+    mockRequest.user = {
+      id: '12',
+      admin: false,
+      superAdmin: true,
+    };
+
+    const res = await userController.getAllUsers(mockRequest, response);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+  })
+
+  it('should return 500 when try get all users', async () => {
+    const response = mockResponse();
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.headers = {
+      authorization: 'Bearer mockToken',
+    };
+    mockRequest.query = {
+      count: '8',
+      page: '1'
+    }
+
+    mockRequest.user = {
+      id: '12',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const createQueryBuilder: any = {
+      select: () => createQueryBuilder,
+      skip: () => createQueryBuilder,
+      take: () => createQueryBuilder,
+      getMany: () => [userMock],
+    };
+
+    jest
+    .spyOn(connection.getRepository(User), 'createQueryBuilder')
+    .mockImplementation(() => createQueryBuilder);
+
+    const userRepository = connection.getRepository(User);
+
+    userRepository.createQueryBuilder().getCount = jest.fn().mockImplementation(() => { throw new Error });
+
+    const res = await userController.getAllUsers(mockRequest, response);
+
     expect(res.status).toHaveBeenCalledWith(500);
-  });
+  })
 });
 
 describe('Test Get User function', () => {
@@ -226,107 +257,6 @@ describe('Test Get User function', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('should return a list of all users', async () => {
-    const response = mockResponse();
-    const mockRequest = {} as Request;
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
-    };
-    mockRequest.query = {
-      count: '8',
-      page: '1'
-    }
-
-    const createQueryBuilder: any = {
-      select: () => createQueryBuilder,
-      skip: () => createQueryBuilder,
-      take: () => createQueryBuilder,
-      getMany: () => [userMock],
-    };
-
-    jest
-    .spyOn(connection.getRepository(User), 'createQueryBuilder')
-    .mockImplementation(() => createQueryBuilder);
-
-    const userRepository = connection.getRepository(User);
-
-    userRepository.createQueryBuilder().getCount = jest.fn().mockResolvedValueOnce(1);
-
-    const saida = {
-      id: 'true',
-      admin: true,
-      superAdmin: true,
-    };
-    connection.getRepository(User)
-
-
-    jwt.decode = jest.fn().mockImplementation(() => saida);
-
-    const res = await userController.getAllUsers(mockRequest, response);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-  })
-
-  it('should return 401 when try get all users with not admin account', async () => {
-    const response = mockResponse();
-    const mockRequest = {} as Request;
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
-    };
-
-    const saida = {
-      id: 'true',
-      admin: false,
-      superAdmin: true,
-    };
-
-    jwt.decode = jest.fn().mockImplementation(() => saida);
-
-    const res = await userController.getAllUsers(mockRequest, response);
-
-    expect(res.status).toHaveBeenCalledWith(401);
-  })
-
-  it('should return 500 when try get all users', async () => {
-    const response = mockResponse();
-    const mockRequest = {} as Request;
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
-    };
-    mockRequest.query = {
-      count: '8',
-      page: '1'
-    }
-
-    const createQueryBuilder: any = {
-      select: () => createQueryBuilder,
-      skip: () => createQueryBuilder,
-      take: () => createQueryBuilder,
-      getMany: () => [userMock],
-    };
-
-    jest
-    .spyOn(connection.getRepository(User), 'createQueryBuilder')
-    .mockImplementation(() => createQueryBuilder);
-
-    const userRepository = connection.getRepository(User);
-
-    userRepository.createQueryBuilder().getCount = jest.fn().mockImplementation(() => { throw new Error });
-
-    const saida = {
-      id: 'true',
-      admin: true,
-      superAdmin: true,
-    };
-    connection.getRepository(User)
-
-
-    jwt.decode = jest.fn().mockImplementation(() => saida);
-
-    const res = await userController.getAllUsers(mockRequest, response);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-  })
 
   it('should get a statusCode 500 if user not exist', async () => {
     const response = mockResponse();

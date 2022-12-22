@@ -46,7 +46,7 @@ describe('Test middleware generateToken', () => {
 });
 
 describe('Test middleware authUser', () => {
-  it('Should get a statusCode 401 when user send header', async () => {
+  it('Should get a statusCode 401 when user not send header', async () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
     const res = (await auth.auth(mockRequest, response, () => {})) as Response;

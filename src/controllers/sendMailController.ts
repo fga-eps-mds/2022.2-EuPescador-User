@@ -6,7 +6,7 @@ import { v4 as uuidV4 } from 'uuid';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { hash } from 'bcrypt';
-import { sendMailService } from '../services/sendMailService';
+import SendMailService from '../services/sendMailService';
 import { connection } from '../database';
 import User from '../database/entities/user';
 import Token from '../database/entities/token';
@@ -50,8 +50,8 @@ export default class SendMailController {
           time: dayjs(haveValidToken.expires_at).diff(dayjs(), 'minute'),
         });
       }
-
-      await sendMailService(email, html, 'Recuperação de Senha');
+      const sendMail = new SendMailService();
+      await sendMail.send(email, html, 'Recuperação de Senha');
       const token = new Token();
       token.id = uuidV4();
       token.value = tokenValue;
@@ -62,6 +62,7 @@ export default class SendMailController {
 
       return res.status(200).json({ message: 'Email enviado com sucesso!' });
     } catch (error) {
+      console.log(error);
       return res.status(500).json({ message: 'Falha ao enviar email!' });
     }
   }

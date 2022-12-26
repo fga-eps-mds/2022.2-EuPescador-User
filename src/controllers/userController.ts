@@ -66,37 +66,38 @@ export default class UserController {
     let data;
 
     const { admin } = req.user as Idata;
-    
+
     if (!admin) {
       return res.status(401).json({ message: 'Token invalido!' });
     }
     try {
       const userRepository = connection.getRepository(User);
-      data = await userRepository.createQueryBuilder("user")
-      .select([
-        'user.id',
-        'user.name',
-        'user.email',
-        'user.phone',
-        'user.state',
-        'user.city',
-        'user.admin',
-        'user.superAdmin',
-      ])
-      .skip((page - 1) * count)
-      .take(count)
-      .getMany();
+      data = await userRepository
+        .createQueryBuilder('user')
+        .select([
+          'user.id',
+          'user.name',
+          'user.email',
+          'user.phone',
+          'user.state',
+          'user.city',
+          'user.admin',
+          'user.superAdmin',
+        ])
+        .skip((page - 1) * count)
+        .take(count)
+        .getMany();
 
-      const quantityOfUsers = await userRepository.createQueryBuilder("user")
-      .getCount();
+      const quantityOfUsers = await userRepository
+        .createQueryBuilder('user')
+        .getCount();
 
       totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
-
     } catch (error) {
       return res.status(500);
     }
 
-    return res.status(200).json({data, page, count, totalPages});
+    return res.status(200).json({ data, page, count, totalPages });
   };
 
   getOneUser = async (req: RequestWithUserRole, res: Response) => {
@@ -156,6 +157,7 @@ export default class UserController {
           message: 'Usuário não encontado',
         });
       }
+
       const pass = String(user.password);
       const mathPass = await compare(password, pass);
 
@@ -194,7 +196,7 @@ export default class UserController {
       const emailTaken = await userRepository.findOne({ where: { email } });
       const phoneTaken = await userRepository.findOne({ where: { phone } });
 
-      if (userExistEdit?.id !== id) {
+      if ((userExistEdit && userExistEdit.id !== id) || !userExistEdit) {
         return res.status(401).json({
           message: 'Você não tem permissão de editar um usuário',
         });
@@ -271,7 +273,7 @@ export default class UserController {
       await userRepository.update(id, userExistEdit);
       delete userExistEdit.password;
       return res.status(200).json(userExistEdit);
-    } catch {
+    } catch (error) {
       return res.status(500).json({
         message: 'Falha no sistema ao editar, tente novamente!',
       });
@@ -301,7 +303,7 @@ export default class UserController {
       delete userExist.password;
       return res.status(200).json(userExist);
     } catch (error) {
-      return res.status(400).json({
+      return res.status(500).json({
         message: 'Falha no sistema ao deletar, tente novamente!',
       });
     }

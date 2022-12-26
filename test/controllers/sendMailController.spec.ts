@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
+
+import nodemailer from 'nodemailer';
 import { connection } from '../../src/database';
 import User from '../../src/database/entities/user';
 import Token from '../../src/database/entities/token';
 import SendMailController from '../../src/controllers/sendMailController';
+import SendMailService from '../../src/services/sendMailService';
 
 const userRepository = connection.getRepository(User);
 const tokenRepository = connection.getRepository(Token);
 const sendMail = new SendMailController();
+const sendMailService = new SendMailService();
 
 const mockResponse = () => {
   const response = {} as Response;
@@ -43,6 +47,16 @@ describe('Test send mail function', () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
+  it('Should get a statusCode 500 when user send null email', async () => {
+    const response = mockResponse();
+    const mockRequest = {} as Request;
+    mockRequest.body = {
+      email: undefined,
+    };
+    const res = await sendMail.sendMail(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
   it('Should get a statusCode 404 if email not found', async () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
@@ -68,6 +82,31 @@ describe('Test send mail function', () => {
     tokenRepository.findOne = jest.fn().mockImplementationOnce(() => tokenMock);
     const res = await sendMail.sendMail(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(409);
+  });
+
+  it('Should get a statusCode 200 if send mail', async () => {
+    const response = mockResponse();
+    const mockRequest = {} as Request;
+    mockRequest.body = {
+      email: 'teste@teste.com',
+    };
+
+    mockRequest.params = {
+      value: '1',
+    };
+
+    userRepository.findOne = jest.fn().mockImplementationOnce(() => userMock);
+    tokenRepository.delete = jest.fn().mockImplementationOnce(() => undefined);
+    tokenRepository.findOne = jest.fn().mockImplementationOnce(() => undefined);
+    tokenRepository.save = jest.fn().mockImplementationOnce(() => tokenMock);
+    nodemailer.createTransport = jest.fn().mockImplementationOnce(() => ({
+      sendMail: () => Promise.resolve({}),
+      close: () => Promise.resolve({}),
+    }));
+    sendMailService.send = jest.fn().mockImplementationOnce(() => true);
+
+    const res = await sendMail.sendMail(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 });
 

@@ -449,6 +449,110 @@ describe('Test Login function', () => {
 });
 
 describe('Test Update user by id', () => {
+  it('Should get a statusCode 500 if have intenal erro', async () => {
+    const userRepository = connection.getRepository(User);
+    const userMock1 = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '56565777',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+    jest.spyOn(userRepository, 'findOne').mockReturnValue(Promise.reject());
+    userRepository.update = jest
+      .fn()
+      .mockReturnValue(Promise.resolve(userMock1));
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '56565777',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.params = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+    };
+
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUserByID(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('should get a statusCode 200 if user update', async () => {
+    const userRepository = connection.getRepository(User);
+    const userMock1 = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '56565777',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(userMock1));
+    userRepository.update = jest
+      .fn()
+      .mockReturnValue(Promise.resolve(userMock1));
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '56565777',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.params = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+    };
+
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUserByID(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
   it('should get a statusCode 401 if user not authorized', async () => {
     const mockRequest = {} as RequestWithUserRole;
     mockRequest.body = {
@@ -527,6 +631,45 @@ describe('Test Update user by id', () => {
     expect(res.status).toHaveBeenCalledWith(409);
   });
 
+  it('should get a statusCode 404 if user not exister', async () => {
+    const userRepository = connection.getRepository(User);
+
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(null));
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.params = {
+      id: '1',
+    };
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      password: '123',
+      phone: '565657737',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUserByID(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
   it('should get a statusCode 409 if user changes existing email', async () => {
     const userRepository = connection.getRepository(User);
     const userMock1 = {
@@ -577,32 +720,75 @@ describe('Test Update user by id', () => {
   });
 });
 describe('Test Update user', () => {
-  it('should get a statusCode 401 if user not authorized', async () => {
+  it('Should get a statusCode 409 if user changes existing email', async () => {
+    const userRepository = connection.getRepository(User);
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockReturnValue(Promise.resolve(null));
     const mockRequest = {} as RequestWithUserRole;
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
     mockRequest.body = {
-      name: 'Weslley',
-      email: 'weslley17e@gmail.com',
-      phone: '11961824141',
-      password: 'pass',
-      state: 'Distrito Federal',
-      city: 'Brasília',
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '565657737',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
     };
 
     mockRequest.user = {
-      id: '1',
-      admin: false,
-      superAdmin: false,
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
     };
-
-    const userRepository = connection.getRepository(User);
-    userRepository.findOne = jest.fn().mockResolvedValueOnce(userMock);
 
     const response = mockResponse();
     const res = await userController.updateUser(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.status).toHaveBeenCalledWith(409);
   });
 
-  it('should get a statusCode 409 if user changes existing cell phone', async () => {
+  it('Should get a statusCode 500 if have intenal erro', async () => {
+    const userRepository = connection.getRepository(User);
+    jest.spyOn(userRepository, 'findOne').mockReturnValue(Promise.reject());
+    const mockRequest = {} as RequestWithUserRole;
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.body = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      email: 'natan@gmail.com',
+      password: '123',
+      phone: '565657737',
+      name: 'Jerson',
+      state: 'Goias',
+      city: 'Rio Verde',
+      admin: true,
+      superAdmin: true,
+    };
+
+    mockRequest.user = {
+      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
+      admin: true,
+      superAdmin: true,
+    };
+
+    const response = mockResponse();
+    const res = await userController.updateUser(mockRequest, response);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('Should get a statusCode 409 if user changes existing cell phone', async () => {
     const userRepository = connection.getRepository(User);
     jest
       .spyOn(userRepository, 'findOne')
@@ -680,40 +866,6 @@ describe('Test Update user', () => {
     const response = mockResponse();
     const res = await userController.updateUser(mockRequest, response);
     expect(res.status).toHaveBeenCalledWith(409);
-  });
-
-  it('should get a statusCode 500 if request failed', async () => {
-    const userRepository = connection.getRepository(User);
-    jest
-      .spyOn(userRepository, 'findOne')
-      .mockReturnValue(Promise.resolve(userMock));
-    const mockRequest = {} as RequestWithUserRole;
-
-    mockRequest.body = {
-      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
-      email: 'natan@gmail.com',
-      password: '123',
-      phone: '56565777',
-      name: 'Jerson',
-      state: 'Goias',
-      city: 'Rio Verde',
-      admin: true,
-      superAdmin: true,
-    };
-
-    mockRequest.user = {
-      id: '53dd2dfe-a4d6-4af7-99a9-afc06db20aec',
-      admin: true,
-      superAdmin: true,
-    };
-
-    mockRequest.headers = {
-      authorization: 'Bearer mockToken',
-    };
-
-    const response = mockResponse();
-    const res = await userController.updateUser(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(500);
   });
 
   it('should get a statusCode 200 if user update', async () => {

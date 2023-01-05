@@ -192,16 +192,20 @@ export default class UserController {
       const { id } = req.user as Idata;
       const { name, email, phone, state, city } = req.body;
       const userRepository = connection.getRepository(User);
-      const userExistEdit = await userRepository.findOne({ where: { id } });
+      const userExistEdit = await userRepository.findOne({
+        where: { id },
+      });
+
       const emailTaken = await userRepository.findOne({ where: { email } });
       const phoneTaken = await userRepository.findOne({ where: { phone } });
 
-      if ((userExistEdit && userExistEdit.id !== id) || !userExistEdit) {
-        return res.status(401).json({
-          message: 'Você não tem permissão de editar um usuário',
+      if (!userExistEdit) {
+        return res.status(409).json({
+          message: 'Email já cadastrado!',
         });
       }
-      if (emailTaken && emailTaken.email !== email) {
+
+      if (emailTaken && userExistEdit && userExistEdit.email !== email) {
         return res.status(409).json({
           message: 'Email já cadastrado!',
         });
@@ -212,6 +216,7 @@ export default class UserController {
           message: 'Número de telefone já cadastrado!',
         });
       }
+
       userExistEdit.name = name;
       userExistEdit.email = email;
       userExistEdit.phone = phone;
@@ -245,21 +250,21 @@ export default class UserController {
         });
       }
 
-      if (emailTaken && emailTaken.email !== email) {
+      if (!userExistEdit) {
+        return res.status(404).json({
+          message: 'O usuário que você quer editar não existe',
+        });
+      }
+
+      if (emailTaken && userExistEdit.email !== email) {
         return res.status(409).json({
           message: 'Email já cadastrado!',
         });
       }
 
-      if (phoneTaken && phoneTaken.phone !== phone) {
+      if (phoneTaken && userExistEdit.phone !== phone) {
         return res.status(409).json({
           message: 'Número de telefone já cadastrado!',
-        });
-      }
-
-      if (!userExistEdit) {
-        return res.status(404).json({
-          message: 'O usuário que você quer editar não existe',
         });
       }
 

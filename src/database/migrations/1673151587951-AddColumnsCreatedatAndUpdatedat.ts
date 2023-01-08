@@ -4,11 +4,9 @@ export default class AddColumnsCreatedatAndUpdatedat1673151587951
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`ALTER TABLE "user" ADD "created_at" TIMESTAMP`);
     await queryRunner.query(
-      `ALTER TABLE "user" ADD "created_at" TIMESTAMP NOT NULL`
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" ADD "updated_at" TIMESTAMP NOT NULL DEFAULT now()`
+      `ALTER TABLE "user" ADD "updated_at" TIMESTAMP DEFAULT now()`
     );
   }
 

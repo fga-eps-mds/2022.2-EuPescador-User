@@ -3,20 +3,17 @@ import { DataSource } from 'typeorm';
 
 export const connection = new DataSource({
   type: 'postgres',
-  host: process.env.POSTGRES_HOST || 'db',
-  port: Number(process.env.POSTGRES_PORT) || 5432,
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
+  host: 'ec2-3-211-221-185.compute-1.amazonaws.com',
+  port: 5432,
+  username: 'hvueocpwjpotwc',
+  password: 'f70e8de4f23ec6606544c2dd8b8c07bc8c337e6fb6ba143c1ccdfbc77887fbc6',
+  database: 'der86gi3t3h22l',
   entities: [`${__dirname}/**/entities/*.{ts,js}`],
   migrations: [`${__dirname}/**/migrations/*.{ts,js}`],
   logging: false,
-  extra: process.env.POSTGRES_HOST
-    ? {
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }
-    : { ssl: false },
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 });
-// 2023-01-08 05:17:28.055378

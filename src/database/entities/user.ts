@@ -1,5 +1,12 @@
+/* eslint-disable camelcase */
 /* eslint-disable import/prefer-default-export */
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { v4 as uuidV4 } from 'uuid';
 
 @Entity('user')
@@ -30,6 +37,12 @@ export default class User {
 
   @Column()
   superAdmin?: boolean;
+
+  @CreateDateColumn()
+  created_at?: Date;
+
+  @UpdateDateColumn()
+  updated_at?: Date;
 
   constructor() {
     if (!this.id) {

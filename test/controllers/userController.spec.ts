@@ -162,6 +162,7 @@ describe('Test Get All User function', () => {
       select: () => createQueryBuilder,
       skip: () => createQueryBuilder,
       take: () => createQueryBuilder,
+      orderBy: () => createQueryBuilder,
       getMany: () => [userMock],
     };
 

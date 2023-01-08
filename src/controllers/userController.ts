@@ -1,9 +1,13 @@
 /* eslint-disable camelcase */
 import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import AuthUser from '../middleware/authUser';
 import { connection } from '../database';
 import User from '../database/entities/user';
+
+dayjs.extend(utc);
 
 interface Idata {
   id: string;
@@ -39,6 +43,7 @@ export default class UserController {
       user.state = state;
       user.password = hashedPassword;
       user.phone = phone;
+      user.created_at = dayjs().toDate();
 
       await userRepository.save(user);
 
@@ -84,6 +89,7 @@ export default class UserController {
           'user.admin',
           'user.superAdmin',
         ])
+        .orderBy('user.created_at', 'DESC')
         .skip((page - 1) * count)
         .take(count)
         .getMany();

@@ -53,6 +53,16 @@ describe('Test middleware authUser', () => {
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
+  it('Should get a statusCode 401 when user send authorization null', async () => {
+    const response = mockResponse();
+    const mockRequest = {} as Request;
+    mockRequest.headers = {
+      authorization: '',
+    };
+    const res = (await auth.auth(mockRequest, response, () => {})) as Response;
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
   it('Should get a statusCode 401 when user send invalid token', async () => {
     const response = mockResponse();
     const mockRequest = {} as Request;
@@ -60,6 +70,18 @@ describe('Test middleware authUser', () => {
       authorization: 'Bearer fake',
     };
     const res = (await auth.auth(mockRequest, response, () => {})) as Response;
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('Should get a statusCode 401 when user not authorization', async () => {
+    const response = mockResponse();
+    const mockRequest = {} as Request;
+    mockRequest.headers = {
+      authorization: undefined,
+    };
+
+    const res = (await auth.auth(mockRequest, response, () => {})) as Response;
+
     expect(res.status).toHaveBeenCalledWith(401);
   });
 

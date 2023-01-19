@@ -12,9 +12,6 @@ export default class SendMailService {
           user: process.env.SMTP_LOGIN,
           pass: process.env.SMTP_PASSWORD,
         },
-        tls: {
-          rejectUnauthorized: false,
-        } 
       });
 
       await transporter.sendMail({

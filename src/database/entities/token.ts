@@ -8,9 +8,6 @@ export default class Token {
   id?: string;
 
   @Column({ nullable: true })
-  value?: string;
-
-  @Column({ nullable: true })
   user_id?: string;
 
   @Column()

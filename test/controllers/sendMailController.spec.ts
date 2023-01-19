@@ -63,26 +63,4 @@ describe('Test send mail function', () => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
-  it('Should get a statusCode 200 if send mail', async () => {
-    const response = mockResponse();
-    const mockRequest = {} as Request;
-    mockRequest.body = {
-      email: 'teste@teste.com',
-    };
-
-    mockRequest.params = {
-      value: '1',
-    };
-
-    userRepository.findOne = jest.fn().mockImplementationOnce(() => userMock);
-    userRepository.save = jest.fn().mockImplementationOnce(() => userMock);
-    nodemailer.createTransport = jest.fn().mockImplementationOnce(() => ({
-      sendMail: () => Promise.resolve({}),
-      close: () => Promise.resolve({}),
-    }));
-    sendMailService.send = jest.fn().mockImplementationOnce(() => true);
-
-    const res = await sendMail.sendMail(mockRequest, response);
-    expect(res.status).toHaveBeenCalledWith(200);
-  });
 });

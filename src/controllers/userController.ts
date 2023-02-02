@@ -1,9 +1,13 @@
 /* eslint-disable camelcase */
 import { Request, Response } from 'express';
 import { hash, compare } from 'bcrypt';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import AuthUser from '../middleware/authUser';
 import { connection } from '../database';
 import User from '../database/entities/user';
+
+dayjs.extend(utc);
 
 interface Idata {
   id: string;
@@ -39,6 +43,7 @@ export default class UserController {
       user.state = state;
       user.password = hashedPassword;
       user.phone = phone;
+      user.created_at = dayjs().toDate();
 
       await userRepository.save(user);
 
@@ -60,46 +65,59 @@ export default class UserController {
   };
 
   getAllUsers = async (req: RequestWithUserRole, res: Response) => {
+    const count = req.query?.count !== undefined ? +req.query.count : 0;
+    const page = req.query?.page !== undefined ? +req.query.page : 0;
+    let totalPages = 1;
     let data;
-    if (!req.user?.admin) {
-      res.status(401);
+
+    const { admin } = req.user as Idata;
+
+    if (!admin) {
+      return res.status(401).json({ message: 'Token invalido!' });
     }
     try {
       const userRepository = connection.getRepository(User);
-      data = await userRepository.find({
-        select: [
-          'id',
-          'name',
-          'email',
-          'phone',
-          'state',
-          'city',
-          'admin',
-          'superAdmin',
-        ],
-      });
+      data = await userRepository
+        .createQueryBuilder('user')
+        .select([
+          'user.id',
+          'user.name',
+          'user.email',
+          'user.phone',
+          'user.state',
+          'user.city',
+          'user.admin',
+          'user.superAdmin',
+        ])
+        .orderBy('user.created_at', 'DESC')
+        .skip((page - 1) * count)
+        .take(count)
+        .getMany();
+
+      const quantityOfUsers = await userRepository
+        .createQueryBuilder('user')
+        .getCount();
+
+      totalPages = count === 0 ? 1 : Math.ceil(quantityOfUsers / count);
     } catch (error) {
-      res.status(401);
+      return res.status(500);
     }
 
-    res.status(200).json(data);
+    return res.status(200).json({ data, page, count, totalPages });
   };
 
   getOneUser = async (req: RequestWithUserRole, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+    let userExist;
     try {
-      const authenticateUser = new AuthUser();
-      const { admin, id } = authenticateUser.decodeToken(token);
+      const { admin, id } = req.user as Idata;
       const idRouter = req.params.id;
       if (!admin && id !== idRouter) {
-        res.status(401).json({ message: 'Token invalido!' });
+        return res.status(401).json({ message: 'Token invalido!' });
       }
-
       const userRepository = connection.getRepository(User);
-      const userExist = await userRepository.findOne({
-        where: { id },
+      const userID = idRouter || id;
+      userExist = await userRepository.findOne({
+        where: { id: userID },
         select: [
           'id',
           'admin',
@@ -111,17 +129,28 @@ export default class UserController {
           'city',
         ],
       });
-
-      return res.status(200).json(userExist);
     } catch (error) {
       return res.status(500).json({
         message: 'Falha ao processar requisição',
       });
     }
+
+    if (!userExist) {
+      return res.status(404).json({
+        message: 'Usuário não encontrado',
+      });
+    }
+
+    return res.status(200).json(userExist);
   };
 
   login = async (req: Request, res: Response) => {
     const { emailPhone, password } = req.body;
+
+    if (!emailPhone || !password) {
+      return res.status(400).json({ message: 'Dados inválidos' });
+    }
+
     const authenticateUser = new AuthUser();
     try {
       const userRepository = connection.getRepository(User);
@@ -134,6 +163,7 @@ export default class UserController {
           message: 'Usuário não encontado',
         });
       }
+
       const pass = String(user.password);
       const mathPass = await compare(password, pass);
 
@@ -163,26 +193,25 @@ export default class UserController {
     }
   };
 
-  updateUser = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  updateUser = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const authenticateUser = new AuthUser();
-      const { id } = authenticateUser.decodeToken(token);
+      const { id } = req.user as Idata;
       const { name, email, phone, state, city } = req.body;
       const userRepository = connection.getRepository(User);
-      const userExistEdit = await userRepository.findOne({ where: { id } });
+      const userExistEdit = await userRepository.findOne({
+        where: { id },
+      });
+
       const emailTaken = await userRepository.findOne({ where: { email } });
       const phoneTaken = await userRepository.findOne({ where: { phone } });
 
-      if (userExistEdit?.id !== id) {
-        return res.status(401).json({
-          message: 'Você não tem permissão de editar um usuário',
+      if (!userExistEdit) {
+        return res.status(409).json({
+          message: 'Email já cadastrado!',
         });
       }
 
-      if (emailTaken && emailTaken.email !== email) {
+      if (emailTaken && userExistEdit && userExistEdit.email !== email) {
         return res.status(409).json({
           message: 'Email já cadastrado!',
         });
@@ -193,6 +222,7 @@ export default class UserController {
           message: 'Número de telefone já cadastrado!',
         });
       }
+
       userExistEdit.name = name;
       userExistEdit.email = email;
       userExistEdit.phone = phone;
@@ -209,13 +239,9 @@ export default class UserController {
     }
   };
 
-  updateUserByID = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  updateUserByID = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const authenticateUser = new AuthUser();
-      const { superAdmin } = authenticateUser.decodeToken(token);
+      const { superAdmin } = req.user as Idata;
       const { id } = req.params;
       const { name, email, phone, state, city, admin } = req.body;
       const superAdminEdit = req.body.superAdmin;
@@ -230,21 +256,21 @@ export default class UserController {
         });
       }
 
-      if (emailTaken && emailTaken.email !== email) {
+      if (!userExistEdit) {
+        return res.status(404).json({
+          message: 'O usuário que você quer editar não existe',
+        });
+      }
+
+      if (emailTaken && userExistEdit.email !== email) {
         return res.status(409).json({
           message: 'Email já cadastrado!',
         });
       }
 
-      if (phoneTaken && phoneTaken.phone !== phone) {
+      if (phoneTaken && userExistEdit.phone !== phone) {
         return res.status(409).json({
           message: 'Número de telefone já cadastrado!',
-        });
-      }
-
-      if (!userExistEdit) {
-        return res.status(404).json({
-          message: 'O usuário que você quer editar não existe',
         });
       }
 
@@ -259,20 +285,15 @@ export default class UserController {
       delete userExistEdit.password;
       return res.status(200).json(userExistEdit);
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         message: 'Falha no sistema ao editar, tente novamente!',
       });
     }
   };
 
-  deleteUser = async (req: Request, res: Response) => {
-    const headerBearer = req.headers.authorization;
-    const token = String(headerBearer?.split(' ')[1]);
-
+  deleteUser = async (req: RequestWithUserRole, res: Response) => {
     try {
-      const authenticateUser = new AuthUser();
-      const { superAdmin } = authenticateUser.decodeToken(token);
+      const { superAdmin } = req.user as Idata;
       const { id } = req.params;
       const userRepository = connection.getRepository(User);
       const userExist = await userRepository.findOne({ where: { id } });
@@ -293,7 +314,7 @@ export default class UserController {
       delete userExist.password;
       return res.status(200).json(userExist);
     } catch (error) {
-      return res.status(400).json({
+      return res.status(500).json({
         message: 'Falha no sistema ao deletar, tente novamente!',
       });
     }

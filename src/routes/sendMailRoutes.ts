@@ -9,8 +9,4 @@ sendMailRoutes.post('/', (req: Request, res: Response) => {
   sendMailController.sendMail(req, res);
 });
 
-sendMailRoutes.get('/token', (req: Request, res: Response) => {
-  sendMailController.verifyToken(req, res);
-});
-
 export default sendMailRoutes;

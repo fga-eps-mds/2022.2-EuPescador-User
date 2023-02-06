@@ -6,7 +6,7 @@ Para fazer uso do ambiente de desenvolvimento é necessário possuir dois pacote
 * docker
 * docker-compose
 
-## 1.1 Mas o que é Docker?
+### 1.1 Mas o que é Docker?
 Docker é uma plataforma aberta, criada com o objetivo de facilitar o desenvolvimento, a implantação e a execução de aplicações em ambientes isolados. Para uma base maior do seu propósito e funcionamento é possível acessar o seguinte link:
 
 https://www.redhat.com/pt-br/topics/containers/what-is-docker
@@ -21,4 +21,13 @@ docker compose build
 Após o build, podemos fazer o comando na raiz do projeto para iniciar a imagem criada:
 ```bash
 docker compose up
+```
+
+## 2. Configurações  
+Para configurar o serviço deve criar variáveis de ambiente no servidor de acordo com arquivo .env.example
+
+### 2.1 Migrations  
+Para subir as migrations só se faz necessário rodar os seguintes comandos na raiz do projeto:
+```bash
+yarn migration:run
 ```
